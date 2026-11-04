@@ -1,0 +1,302 @@
+{
+  "info": {
+    "name": "Grupo Planeta — Fornecedores",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Requisições manuais da API. Variáveis de credenciais estão vazias. Não execute a coleção inteira automaticamente contra dados reais: há criação, alteração de senha e exclusão permanente."
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "login",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "senha",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idFornecedor",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "idCidade",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "novoNome",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "novoLogin",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "senhaNovoUsuario",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "senhaAtual",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "novaSenha",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/health",
+        "description": "Somente processo HTTP; não testa o banco.",
+        "auth": {
+          "type": "noauth"
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/auth/login",
+        "description": "Preencha login e senha somente nas variáveis locais. Salva o token desta resposta na coleção.",
+        "auth": {
+          "type": "noauth"
+        },
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"login\": \"{{login}}\",\n  \"senha\": \"{{senha}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.set('token', '');"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "if (pm.response.code === 200) {",
+              "  const resposta = pm.response.json();",
+              "  if (resposta.token) pm.collectionVariables.set('token', resposta.token);",
+              "}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Listar fornecedores",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/fornecedores?pagina=1&limite=20",
+        "description": "Adicione busca e ativo conforme necessário."
+      }
+    },
+    {
+      "name": "Buscar fornecedor",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/fornecedores/{{idFornecedor}}",
+        "description": ""
+      }
+    },
+    {
+      "name": "Cadastrar fornecedor",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/fornecedores",
+        "description": "Grava um registro ilustrativo. Preencha idCidade com o ID interno retornado pela API.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tipoPessoa\": \"FISICA\",\n  \"nomeRazaoSocial\": \"Fornecedor de Exemplo\",\n  \"cpf\": \"52998224725\",\n  \"email\": \"contato@example.com\",\n  \"setor\": \"Manutenção\",\n  \"logradouro\": \"Rua de Exemplo\",\n  \"numero\": \"100\",\n  \"bairro\": \"Centro\",\n  \"cep\": \"01001000\",\n  \"cidadeId\": {{idCidade}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Editar fornecedor",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/fornecedores/{{idFornecedor}}",
+        "description": "Atualização completa. Campos opcionais omitidos são limpos, com exceção do status.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"tipoPessoa\": \"FISICA\",\n  \"nomeRazaoSocial\": \"Fornecedor de Exemplo\",\n  \"cpf\": \"52998224725\",\n  \"email\": \"contato@example.com\",\n  \"setor\": \"Manutenção\",\n  \"logradouro\": \"Rua de Exemplo\",\n  \"numero\": \"100\",\n  \"bairro\": \"Centro\",\n  \"cep\": \"01001000\",\n  \"cidadeId\": {{idCidade}}\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Inativar fornecedor",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/fornecedores/{{idFornecedor}}/ativo",
+        "description": "Use true para reativar.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"ativo\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Excluir fornecedor",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/fornecedores/{{idFornecedor}}",
+        "description": "Exclusão permanente. Confira idFornecedor e execute apenas se desejar apagar esse registro.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"confirmacao\": \"EXCLUIR\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Consultar cidade pelo IBGE",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/v1/cidades?codigoIbge=3509502",
+        "description": "Use o ID interno retornado, não o código IBGE, em idCidade."
+      }
+    },
+    {
+      "name": "Criar usuário",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/usuarios",
+        "description": "Cria uma nova conta ativa. Exige um token de usuário existente.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"{{novoNome}}\",\n  \"login\": \"{{novoLogin}}\",\n  \"senha\": \"{{senhaNovoUsuario}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "Alterar minha senha",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/v1/usuarios/me/senha",
+        "description": "Altera a senha da conta autenticada. Tokens já emitidos não são revogados automaticamente.",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"senhaAtual\": \"{{senhaAtual}}\",\n  \"novaSenha\": \"{{novaSenha}}\",\n  \"confirmacaoSenha\": \"{{novaSenha}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      }
+    }
+  ]
+}

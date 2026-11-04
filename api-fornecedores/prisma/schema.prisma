@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum TipoPessoa {
+  FISICA
+  JURIDICA
+}
+
+model Usuario {
+  id           Int      @id @default(autoincrement()) @map("id_usu")
+  nome         String   @map("usu_nome") @db.VarChar(100)
+  login        String   @unique @map("usu_login") @db.VarChar(100)
+  senhaHash    String   @map("usu_senha") @db.VarChar(255)
+  ativo        Boolean  @default(true)
+  criadoEm     DateTime @default(now()) @map("criado_em")
+  atualizadoEm DateTime @updatedAt @map("atualizado_em")
+
+  @@map("gpc001")
+}
+
+model Fornecedor {
+  id                 Int        @id @default(autoincrement()) @map("id_for")
+  tipoPessoa         TipoPessoa @map("for_pessoa")
+  nomeRazaoSocial    String     @map("for_razao") @db.VarChar(150)
+  nomeFantasia       String?    @map("for_fantasia") @db.VarChar(150)
+
+  cpf                String?    @unique @map("for_cpf") @db.VarChar(11)
+  cnpj               String?    @unique @map("for_cnpj") @db.VarChar(14)
+  inscricaoEstadual  String?    @map("for_ie") @db.VarChar(20)
+  rg                 String?    @map("for_rg") @db.VarChar(20)
+
+  logradouro         String     @map("for_end") @db.VarChar(150)
+  numero             String     @map("for_numero") @db.VarChar(20)
+  complemento        String?    @map("for_complemento") @db.VarChar(100)
+  bairro             String     @map("for_bairro") @db.VarChar(100)
+  cep                String     @map("for_cep") @db.Char(8)
+
+cidadeId Int    @map("cod_cid")
+cidade   Cidade @relation(fields: [cidadeId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  nomeContato        String?    @map("for_contato") @db.VarChar(100)
+  email              String?    @map("for_email") @db.VarChar(254)
+  telefone           String?    @map("for_telefone") @db.VarChar(20)
+  celular            String?    @map("for_celular") @db.VarChar(20)
+
+  site               String?    @map("for_site") @db.VarChar(255)
+  setor              String?    @map("for_setor") @db.VarChar(100)
+  observacoes        String?    @map("for_obs") @db.Text
+
+  ativo              Boolean    @default(true)
+  criadoEm           DateTime   @default(now()) @map("data_cadastro")
+  atualizadoEm       DateTime   @updatedAt @map("atualizado_em")
+
+  @@index([cidadeId])
+  @@map("gpc002")
+}
+
+model Cidade {
+  id           Int          @id @default(autoincrement()) @map("id_cidades")
+  codigoIbge   String       @unique @map("cid_numero") @db.Char(7)
+  nome         String       @map("cid_nome") @db.VarChar(100)
+  uf           String       @map("cid_uf") @db.Char(2)
+
+  fornecedores Fornecedor[]
+
+  @@index([uf, nome])
+  @@map("gp_cidades")
+}

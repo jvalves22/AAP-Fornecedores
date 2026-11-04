@@ -1,0 +1,28 @@
+# Dependências e saídas locais em qualquer módulo
+**/node_modules/
+**/dist/
+**/test-results/
+**/playwright-report/
+**/coverage/
+**/.backups/
+**/.npm-cache/
+**/*.log
+
+# Configuração privada
+**/.env
+**/.env.*
+!**/.env.example
+
+# Backups de banco não fazem parte do código
+**/*.dump
+**/backup*.sql
+
+# Editor e sistema
+.DS_Store
+Thumbs.db
+
+**/src/generated/prisma/
+
+**/src/generated/prisma/
+
+**/src/generated/prisma/

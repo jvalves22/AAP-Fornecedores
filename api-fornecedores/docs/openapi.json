@@ -1,0 +1,1433 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Grupo Planeta — API de Fornecedores",
+    "version": "1.0.0",
+    "description": "Contrato da implementação JavaScript/Express documentada em 04/11/2026. Não há credenciais ou conta padrão. Todas as rotas de negócio exigem usuário ativo e token Bearer."
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000/api/v1",
+      "description": "Desenvolvimento local"
+    }
+  ],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Saúde"
+    },
+    {
+      "name": "Autenticação"
+    },
+    {
+      "name": "Fornecedores"
+    },
+    {
+      "name": "Cidades"
+    },
+    {
+      "name": "Usuários"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "Saúde"
+        ],
+        "operationId": "health",
+        "summary": "Verificar processo HTTP",
+        "description": "Não testa MariaDB.",
+        "security": [],
+        "servers": [
+          {
+            "url": "http://localhost:3000"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Servidor HTTP ativo.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "enum": [
+                        "ok"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Autenticação"
+        ],
+        "operationId": "login",
+        "summary": "Autenticar usuário",
+        "security": [],
+        "requestBody": {
+          "required": true,
+          "description": "Login em minúsculas e senha exata; o backend também normaliza o login.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Autenticação concluída.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Sessao"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou conflito de cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticação necessária.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fornecedores": {
+      "get": {
+        "tags": [
+          "Fornecedores"
+        ],
+        "operationId": "listarFornecedores",
+        "summary": "Listar fornecedores",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "pagina",
+            "required": false,
+            "description": "Inteiro positivo; o deslocamento também é limitado pelo service.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1
+            }
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "required": false,
+            "description": "Registros por página.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            }
+          },
+          {
+            "in": "query",
+            "name": "busca",
+            "required": false,
+            "description": "Busca por parte do nome/razão social.",
+            "schema": {
+              "type": "string",
+              "maxLength": 150,
+              "default": ""
+            }
+          },
+          {
+            "in": "query",
+            "name": "ativo",
+            "required": false,
+            "description": "Ausente inclui ativos e inativos.",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListaFornecedores"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou conflito de cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticação necessária.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Fornecedores"
+        ],
+        "operationId": "criarFornecedor",
+        "summary": "Cadastrar fornecedor",
+        "requestBody": {
+          "required": true,
+          "description": "Uma cidade existente e pelo menos um meio de contato são obrigatórios.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FornecedorEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Fornecedor criado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Fornecedor"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou conflito de cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticação necessária.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fornecedores/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "description": "ID interno do fornecedor."
+        }
+      ],
+      "get": {
+        "tags": [
+          "Fornecedores"
+        ],
+        "operationId": "buscarFornecedor",
+        "summary": "Buscar fornecedor por ID",
+        "responses": {
+          "200": {
+            "description": "Fornecedor com cidade.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Fornecedor"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou conflito de cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticação necessária.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Registro não encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Fornecedores"
+        ],
+        "operationId": "atualizarFornecedor",
+        "summary": "Atualizar dados completos",
+        "description": "Campos opcionais omitidos são limpos. Ativo é preservado quando omitido; id e criadoEm não mudam.",
+        "requestBody": {
+          "required": true,
+          "description": "Contrato completo de edição.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FornecedorEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Fornecedor atualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Fornecedor"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou conflito de cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticação necessária.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Registro não encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Fornecedores"
+        ],
+        "operationId": "excluirFornecedor",
+        "summary": "Excluir permanentemente com confirmação",
+        "requestBody": {
+          "required": true,
+          "description": "Confirmação explícita e exata.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "confirmacao"
+                ],
+                "properties": {
+                  "confirmacao": {
+                    "type": "string",
+                    "enum": [
+                      "EXCLUIR"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Exclusão concluída.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mensagem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou conflito de cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticação necessária.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Registro não encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fornecedores/{id}/ativo": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "description": "ID interno do fornecedor."
+        }
+      ],
+      "patch": {
+        "tags": [
+          "Fornecedores"
+        ],
+        "operationId": "alterarStatusFornecedor",
+        "summary": "Ativar ou inativar",
+        "requestBody": {
+          "required": true,
+          "description": "Envie um booleano JSON.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "ativo"
+                ],
+                "properties": {
+                  "ativo": {
+                    "type": "boolean"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Status atualizado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FornecedorSemCidade"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou conflito de cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticação necessária.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Registro não encontrado.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cidades": {
+      "get": {
+        "tags": [
+          "Cidades"
+        ],
+        "operationId": "listarCidades",
+        "summary": "Consultar até 50 cidades",
+        "description": "Filtros combinados por AND; ordenação por UF, nome e ID.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "uf",
+            "required": false,
+            "description": "Sigla válida, normalizada para maiúsculas.",
+            "schema": {
+              "type": "string",
+              "maxLength": 2,
+              "pattern": "^[a-zA-Z]{2}$"
+            }
+          },
+          {
+            "in": "query",
+            "name": "busca",
+            "required": false,
+            "description": "Trecho do nome.",
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": ""
+            }
+          },
+          {
+            "in": "query",
+            "name": "codigoIbge",
+            "required": false,
+            "description": "Código IBGE exato, usado após a consulta ViaCEP.",
+            "schema": {
+              "type": "string",
+              "maxLength": 7,
+              "pattern": "^[0-9]{7}$"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Cidades encontradas, ou array vazio.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "maxItems": 50,
+                  "items": {
+                    "$ref": "#/components/schemas/Cidade"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou conflito de cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticação necessária.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usuarios": {
+      "post": {
+        "tags": [
+          "Usuários"
+        ],
+        "operationId": "criarUsuario",
+        "summary": "Criar uma conta",
+        "description": "Exige uma conta ativa autenticada. A confirmação de senha do formulário não integra este corpo.",
+        "requestBody": {
+          "required": true,
+          "description": "A senha é transformada em hash antes de gravar.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UsuarioEntrada"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário criado, sem hash.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioCriado"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou conflito de cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticação necessária.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/usuarios/me/senha": {
+      "patch": {
+        "tags": [
+          "Usuários"
+        ],
+        "operationId": "alterarMinhaSenha",
+        "summary": "Alterar a própria senha",
+        "description": "A conta vem do token. Senha atual incorreta retorna 400; não altera outro usuário por ID enviado no corpo.",
+        "requestBody": {
+          "required": true,
+          "description": "Confirmação deve ser idêntica à nova senha.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TrocaSenha"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Senha alterada.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Mensagem"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos ou conflito de cadastro.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autenticação necessária.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Falha interna.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Erro"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "description": "JWT HS256 válido por uma hora; emissor api-fornecedores e destinatário web-fornecedores."
+      }
+    },
+    "schemas": {
+      "Erro": {
+        "type": "object",
+        "required": [
+          "erro"
+        ],
+        "properties": {
+          "erro": {
+            "type": "string"
+          }
+        }
+      },
+      "Mensagem": {
+        "type": "object",
+        "required": [
+          "mensagem"
+        ],
+        "properties": {
+          "mensagem": {
+            "type": "string"
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "required": [
+          "login",
+          "senha"
+        ],
+        "properties": {
+          "login": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9._-]{3,100}$"
+          },
+          "senha": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "format": "password",
+            "writeOnly": true
+          }
+        }
+      },
+      "UsuarioBasico": {
+        "type": "object",
+        "required": [
+          "id",
+          "nome",
+          "login"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "login": {
+            "type": "string",
+            "maxLength": 100
+          }
+        }
+      },
+      "UsuarioCriado": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/UsuarioBasico"
+          },
+          {
+            "type": "object",
+            "required": [
+              "ativo",
+              "criadoEm"
+            ],
+            "properties": {
+              "ativo": {
+                "type": "boolean"
+              },
+              "criadoEm": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        ]
+      },
+      "Sessao": {
+        "type": "object",
+        "required": [
+          "token",
+          "usuario"
+        ],
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Bearer JWT com duração de uma hora."
+          },
+          "usuario": {
+            "$ref": "#/components/schemas/UsuarioBasico"
+          }
+        }
+      },
+      "UsuarioEntrada": {
+        "type": "object",
+        "required": [
+          "nome",
+          "login",
+          "senha"
+        ],
+        "properties": {
+          "nome": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "login": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 3,
+            "pattern": "^[a-zA-Z0-9._-]{3,100}$"
+          },
+          "senha": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 3,
+            "format": "password",
+            "writeOnly": true
+          }
+        }
+      },
+      "TrocaSenha": {
+        "type": "object",
+        "required": [
+          "senhaAtual",
+          "novaSenha",
+          "confirmacaoSenha"
+        ],
+        "properties": {
+          "senhaAtual": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 1,
+            "format": "password",
+            "writeOnly": true
+          },
+          "novaSenha": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 3,
+            "format": "password",
+            "writeOnly": true
+          },
+          "confirmacaoSenha": {
+            "type": "string",
+            "maxLength": 128,
+            "minLength": 3,
+            "format": "password",
+            "writeOnly": true
+          }
+        }
+      },
+      "Cidade": {
+        "type": "object",
+        "required": [
+          "id",
+          "codigoIbge",
+          "nome",
+          "uf"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "codigoIbge": {
+            "type": "string",
+            "maxLength": 7,
+            "pattern": "^[0-9]{7}$"
+          },
+          "nome": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "uf": {
+            "type": "string",
+            "maxLength": 2
+          }
+        }
+      },
+      "FornecedorEntrada": {
+        "type": "object",
+        "description": "Exige CPF para FISICA ou CNPJ para JURIDICA e ao menos um contato não vazio. CPF/CNPJ preenchidos devem ser únicos. Ver API.md para as validações completas.",
+        "required": [
+          "tipoPessoa",
+          "nomeRazaoSocial",
+          "logradouro",
+          "numero",
+          "bairro",
+          "cep",
+          "cidadeId"
+        ],
+        "properties": {
+          "tipoPessoa": {
+            "type": "string",
+            "enum": [
+              "FISICA",
+              "JURIDICA"
+            ]
+          },
+          "nomeRazaoSocial": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "maxLength": 150,
+            "nullable": true
+          },
+          "cpf": {
+            "type": "string",
+            "maxLength": 11,
+            "nullable": true,
+            "pattern": "^[0-9]{11}$",
+            "description": "Sem pontuação; obrigatório para pessoa física. Dígitos verificadores validados no backend."
+          },
+          "cnpj": {
+            "type": "string",
+            "maxLength": 14,
+            "nullable": true,
+            "pattern": "^[A-Z0-9]{12}[0-9]{2}$",
+            "description": "Sem pontuação; obrigatório para pessoa jurídica. Aceita letras maiúsculas e números; DVs validados."
+          },
+          "inscricaoEstadual": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "rg": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "logradouro": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "numero": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "complemento": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "bairro": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "cep": {
+            "type": "string",
+            "maxLength": 8,
+            "pattern": "^[0-9]{8}$"
+          },
+          "cidadeId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "ID interno da cidade existente, diferente do código IBGE."
+          },
+          "nomeContato": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "nullable": true,
+            "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
+          },
+          "telefone": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "celular": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "site": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "setor": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "observacoes": {
+            "type": "string",
+            "nullable": true
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Padrão true na criação; valor atual preservado no PUT se omitido."
+          }
+        },
+        "oneOf": [
+          {
+            "properties": {
+              "tipoPessoa": {
+                "enum": [
+                  "FISICA"
+                ]
+              },
+              "cpf": {
+                "type": "string",
+                "minLength": 11,
+                "maxLength": 11,
+                "pattern": "^[0-9]{11}$"
+              }
+            },
+            "required": [
+              "cpf"
+            ]
+          },
+          {
+            "properties": {
+              "tipoPessoa": {
+                "enum": [
+                  "JURIDICA"
+                ]
+              },
+              "cnpj": {
+                "type": "string",
+                "minLength": 14,
+                "maxLength": 14,
+                "pattern": "^[A-Z0-9]{12}[0-9]{2}$"
+              }
+            },
+            "required": [
+              "cnpj"
+            ]
+          }
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "email"
+            ],
+            "properties": {
+              "email": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          },
+          {
+            "required": [
+              "telefone"
+            ],
+            "properties": {
+              "telefone": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          },
+          {
+            "required": [
+              "celular"
+            ],
+            "properties": {
+              "celular": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          }
+        ]
+      },
+      "FornecedorSemCidade": {
+        "type": "object",
+        "properties": {
+          "tipoPessoa": {
+            "type": "string",
+            "enum": [
+              "FISICA",
+              "JURIDICA"
+            ]
+          },
+          "nomeRazaoSocial": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1
+          },
+          "nomeFantasia": {
+            "type": "string",
+            "maxLength": 150,
+            "nullable": true
+          },
+          "cpf": {
+            "type": "string",
+            "maxLength": 11,
+            "nullable": true,
+            "pattern": "^[0-9]{11}$",
+            "description": "Sem pontuação; obrigatório para pessoa física. Dígitos verificadores validados no backend."
+          },
+          "cnpj": {
+            "type": "string",
+            "maxLength": 14,
+            "nullable": true,
+            "pattern": "^[A-Z0-9]{12}[0-9]{2}$",
+            "description": "Sem pontuação; obrigatório para pessoa jurídica. Aceita letras maiúsculas e números; DVs validados."
+          },
+          "inscricaoEstadual": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "rg": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "logradouro": {
+            "type": "string",
+            "maxLength": 150,
+            "minLength": 1
+          },
+          "numero": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1
+          },
+          "complemento": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "bairro": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 1
+          },
+          "cep": {
+            "type": "string",
+            "maxLength": 8,
+            "pattern": "^[0-9]{8}$"
+          },
+          "cidadeId": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "description": "ID interno da cidade existente, diferente do código IBGE."
+          },
+          "nomeContato": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "nullable": true
+          },
+          "telefone": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "celular": {
+            "type": "string",
+            "maxLength": 20,
+            "nullable": true
+          },
+          "site": {
+            "type": "string",
+            "maxLength": 255,
+            "nullable": true
+          },
+          "setor": {
+            "type": "string",
+            "maxLength": 100,
+            "nullable": true
+          },
+          "observacoes": {
+            "type": "string",
+            "nullable": true
+          },
+          "ativo": {
+            "type": "boolean",
+            "description": "Padrão true na criação; valor atual preservado no PUT se omitido."
+          },
+          "id": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647,
+            "readOnly": true
+          },
+          "criadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "atualizadoEm": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          }
+        }
+      },
+      "Fornecedor": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/FornecedorSemCidade"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "cidade": {
+                "$ref": "#/components/schemas/Cidade"
+              }
+            }
+          }
+        ]
+      },
+      "ListaFornecedores": {
+        "type": "object",
+        "required": [
+          "dados",
+          "paginacao"
+        ],
+        "properties": {
+          "dados": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Fornecedor"
+            }
+          },
+          "paginacao": {
+            "type": "object",
+            "required": [
+              "pagina",
+              "limite",
+              "total",
+              "totalPaginas"
+            ],
+            "properties": {
+              "pagina": {
+                "type": "integer",
+                "minimum": 1
+              },
+              "limite": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "totalPaginas": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

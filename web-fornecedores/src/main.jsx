@@ -64,7 +64,7 @@ function Dashboard({ rows, user, onLogout }) {
   let angle = 0;
   const gradient = sectors.map(([,count],index) => { const start = angle; angle += count / rows.length * 360; return `${colors[index % colors.length]} ${start}deg ${angle}deg`; }).join(',');
   return <div className="dashboard-page">
-    <div className="user-menu"><span className="user-identity">Olá, <strong>{user.nome.split(' ')[0]}</strong></span><button className="logout-dashboard" onClick={onLogout}>Sair</button></div>
+    <div className="user-menu"><span className="user-identity">Olá, <strong>{user.nome}</strong></span><button className="logout-dashboard" onClick={onLogout}>Sair</button></div>
     <h1>Dashboard - Visão Geral</h1>
     <div className="metrics">{[['Fornecedores Cadastrados',rows.length],['Fornecedores Ativos',rows.filter(row => row.ativo).length],['Novos Cadastros (Mês atual)',month]].map(([label,value]) => <article className="metric card" key={label}><h2>{label}</h2><strong>{value}</strong></article>)}</div>
     <div className="dashboard-panels">
